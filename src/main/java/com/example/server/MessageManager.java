@@ -1,4 +1,4 @@
-package com.example.server.server;
+package com.example.server;
 
 import java.sql.*;
 import java.util.*;

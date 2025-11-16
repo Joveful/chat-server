@@ -1,6 +1,6 @@
 import org.junit.jupiter.api.*;
-import server.ChatServer;
-import server.UserManager;
+import com.example.server.ChatServer;
+import com.example.server.UserManager;
 import testutils.TestClient;
 
 import java.io.IOException;

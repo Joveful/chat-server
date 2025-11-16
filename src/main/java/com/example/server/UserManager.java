@@ -1,4 +1,4 @@
-package com.example.server.server;
+package com.example.server;
 
 import java.io.*;
 import java.security.MessageDigest;

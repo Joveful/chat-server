@@ -1,0 +1,6 @@
+/home/jori/projects/java/chat-server/src/main/java/com/example/client/ChatClient.java
+/home/jori/projects/java/chat-server/src/main/java/com/example/server/ChatServer.java
+/home/jori/projects/java/chat-server/src/main/java/com/example/server/ClientHandler.java
+/home/jori/projects/java/chat-server/src/main/java/com/example/server/MessageManager.java
+/home/jori/projects/java/chat-server/src/main/java/com/example/server/RoomManager.java
+/home/jori/projects/java/chat-server/src/main/java/com/example/server/UserManager.java
