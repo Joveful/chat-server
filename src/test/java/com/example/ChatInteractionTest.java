@@ -1,8 +1,10 @@
+package com.example;
+
 import org.junit.jupiter.api.*;
 import com.example.server.ChatServer;
 import com.example.server.UserManager;
-import testutils.ChatSession;
-import testutils.TestClient;
+import com.example.testutils.ChatSession;
+import com.example.testutils.TestClient;
 
 import java.io.IOException;
 

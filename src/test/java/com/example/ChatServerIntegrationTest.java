@@ -1,7 +1,9 @@
+package com.example;
+
 import org.junit.jupiter.api.*;
 import com.example.server.ChatServer;
 import com.example.server.UserManager;
-import testutils.TestClient;
+import com.example.testutils.TestClient;
 
 import java.io.IOException;
 import java.util.concurrent.*;

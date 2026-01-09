@@ -1,4 +1,4 @@
-package testutils;
+package com.example.testutils;
 
 import java.io.*;
 import java.net.Socket;
