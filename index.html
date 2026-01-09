@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Chat Web Client</title>
+    <style>
+        body { font-family: Arial; max-width: 900px; margin: 20px; }
+        #messages { height: 300px; border:1px solid #ddd; overflow:auto; padding:8px; background:#fafafa; }
+        #users { font-size:0.9em; color:#333; }
+        .sys { color: #777; font-style: italic; }
+        .msg { margin:4px 0; }
+        .meta { color:#999; font-size:0.8em; margin-right:6px; }
+    </style>
+</head>
+<body>
+<h2>Simple Web Chat</h2>
+
+<div>
+    <label>Server WS URL: <input id="url" value="ws://localhost:6969" style="width:300px"></label>
+    <button id="connect">Connect</button>
+</div>
+
+<div id="login" style="margin-top:12px">
+    <input id="username" placeholder="username">
+    <input id="password" type="password" placeholder="password">
+    <button id="btnRegister">Register</button>
+    <button id="btnLogin">Login</button>
+</div>
+
+<div style="margin-top:12px">
+    <input id="room" placeholder="room (e.g. general)">
+    <button id="btnJoin">Join</button>
+    <button id="btnLeave">Leave</button>
+    <button id="btnRooms">List Rooms</button>
+    <button id="btnWho">Who</button>
+</div>
+
+<div id="messages" aria-live="polite"></div>
+
+<div style="margin-top:8px">
+    <input id="text" placeholder="message" style="width:70%">
+    <button id="send">Send</button>
+</div>
+
+<script>
+    let ws;
+    const messages = document.getElementById('messages');
+    function log(kind, text) {
+      const d = document.createElement('div');
+      d.className = kind;
+      d.innerHTML = text;
+      messages.appendChild(d);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    document.getElementById('connect').onclick = () => {
+      const url = document.getElementById('url').value;
+      ws = new WebSocket(url);
+      ws.onopen = () => log('sys', 'Connected.');
+      ws.onclose = () => log('sys', 'Disconnected.');
+      ws.onerror = e => log('sys', 'Error: ' + e);
+      ws.onmessage = (ev) => {
+        try {
+          const obj = JSON.parse(ev.data);
+          if (obj.type === 'system') {
+            log('sys', obj.text);
+          } else if (obj.type === 'message') {
+            if (obj.username) {
+              log('msg', `<span class="meta">[${obj.timestamp || ''}] <b>${obj.username}</b>:</span> ${obj.text}`);
+            } else if (obj.sender) {
+              // Message forwarded from server broadcast
+              log('msg', obj.text);
+            } else {
+              log('msg', JSON.stringify(obj));
+            }
+          } else if (obj.type === 'history') {
+            log('sys', '=== History ===');
+            obj.lines.forEach(l => log('msg', l));
+            log('sys', '=== End History ===');
+          } else if (obj.type === 'rooms') {
+            log('sys', 'Rooms: ' + obj.rooms.join(', '));
+          } else if (obj.type === 'who') {
+            log('sys', 'Users in ' + obj.room + ': ' + obj.users.join(', '));
+          } else {
+            log('sys', JSON.stringify(obj));
+          }
+        } catch (e) {
+          log('sys', 'Invalid message: ' + ev.data);
+        }
+      };
+    };
+
+    document.getElementById('btnRegister').onclick = () => {
+      ws.send(JSON.stringify({type:'register', username: document.getElementById('username').value, password: document.getElementById('password').value}));
+    };
+    document.getElementById('btnLogin').onclick = () => {
+      ws.send(JSON.stringify({type:'login', username: document.getElementById('username').value, password: document.getElementById('password').value}));
+    };
+    document.getElementById('btnJoin').onclick = () => {
+      ws.send(JSON.stringify({type:'join', room: document.getElementById('room').value}));
+    };
+    document.getElementById('btnLeave').onclick = () => {
+      ws.send(JSON.stringify({type:'leave'}));
+    };
+    document.getElementById('btnRooms').onclick = () => {
+      ws.send(JSON.stringify({type:'rooms'}));
+    };
+    document.getElementById('btnWho').onclick = () => {
+      ws.send(JSON.stringify({type:'who'}));
+    };
+    document.getElementById('send').onclick = () => {
+      const text = document.getElementById('text').value;
+      ws.send(JSON.stringify({type:'message', text}));
+      document.getElementById('text').value = '';
+    };
+</script>
+</body>
+</html>
