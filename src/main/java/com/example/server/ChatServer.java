@@ -10,6 +10,9 @@ public class ChatServer {
     private static final Map<String, ClientHandler> onlineUsers = new ConcurrentHashMap<>();
     private static final Map<String, Set<String>> rooms = new ConcurrentHashMap<>();
 
+    // Listeners for WebSocket connections.
+    private static final Set<RoomBroadcastListener> roomListeners = ConcurrentHashMap.newKeySet();
+
     public static void main(String[] args) {
         RoomManager.init();
         List<String> existingRooms = RoomManager.getAllRooms();
@@ -20,6 +23,10 @@ public class ChatServer {
             }
         }
         System.out.println("Loaded rooms from DB: " + existingRooms);
+
+        WebSocketBridge wsBridge = new WebSocketBridge(8080);
+        wsBridge.start();
+        System.out.println("WebSocket bridge listening on port 8080");
 
         System.out.println("Server started on port " + PORT);
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
@@ -93,11 +100,31 @@ public class ChatServer {
         if (!message.startsWith("> ")) {
             MessageManager.saveMessage(roomName, username, message.substring(username.length() + 2));
         }
+
         Set<String> members = rooms.get(roomName);
         if (members == null) return;
+
+        // se
         for (String user : members) {
             ClientHandler handler = onlineUsers.get(user);
             if (handler != null) handler.sendMessage(message);
         }
+
+        for (RoomBroadcastListener l : roomListeners) {
+            try {
+                l.onRoomMessage(roomName, message, username);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // WebSocket methods
+    public static void addRoomBroadcastListener(RoomBroadcastListener l) {
+        roomListeners.add(l);
+    }
+
+    public static void removeBroadcastListener(RoomBroadcastListener l) {
+        roomListeners.remove(l);
     }
 }
